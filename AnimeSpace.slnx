@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src\AnimeSpace.Application/AnimeSpace.Application.csproj" Id="5ba8615e-7f69-415b-80f2-26cd96c1bebd" />
+    <Project Path="src\AnimeSpace.Domain/AnimeSpace.Domain.csproj" Id="a9720816-a195-49b1-9801-77c3dfb72b0b" />
+    <Project Path="src\AnimeSpace.Infrastructure/AnimeSpace.Infrastructure.csproj" Id="1d08754f-ee5c-42d1-959d-0ee49aac20f2" />
+    <Project Path="src\AnimeSpace.Web/AnimeSpace.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests\AnimeSpace.Tests/AnimeSpace.Tests.csproj" />
+  </Folder>
+</Solution>
