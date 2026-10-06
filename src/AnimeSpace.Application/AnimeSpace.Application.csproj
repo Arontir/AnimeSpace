@@ -10,9 +10,4 @@
     <ProjectReference Include="..\AnimeSpace.Domain\AnimeSpace.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Abstractions\Repositories\" />
-    <Folder Include="Abstractions\Services\" />
-  </ItemGroup>
-
 </Project>
