@@ -3,8 +3,15 @@ using AnimeSpace.Domain.Entities;
 
 namespace AnimeSpace.Application.Mappings
 {
+    /// <summary>
+    /// Перетворення коментаря на DTO.
+    /// </summary>
     public static class CommentMappingExtensions
     {
+        /// <summary>
+        /// Створює коментар для показу. Ім'я автора — частина логіна до символу '@'. Автор (User) має бути завантажений через Include.
+        /// </summary>
+        /// <param name="comment">Коментар.</param>
         public static CommentDto ToDto(this Comment comment)
         {
             var rawUserName = comment.User?.UserName ?? string.Empty;
