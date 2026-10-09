@@ -1,4 +1,6 @@
-﻿using AnimeSpace.Infrastructure.Persistence.Context;
+﻿using AnimeSpace.Application.Abstractions.Repositories;
+using AnimeSpace.Infrastructure.Persistence.Context;
+using AnimeSpace.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,6 +18,13 @@ namespace AnimeSpace.Infrastructure
                 options.UseSqlServer(
                     configuration.GetConnectionString("DefaultConnection"),
                     b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
+
+            services.AddScoped<IAnimeRepository, AnimeRepository>();
+            services.AddScoped<IBookmarkRepository, BookmarkRepository>();
+            services.AddScoped<ICommentRepository, CommentRepository>();
+            services.AddScoped<IGenreRepository, GenreRepository>();
+            services.AddScoped<IRatingRepository, RatingRepository>();
+            services.AddScoped<IStatsRepository, StatsRepository>();
 
             return services;
         }
