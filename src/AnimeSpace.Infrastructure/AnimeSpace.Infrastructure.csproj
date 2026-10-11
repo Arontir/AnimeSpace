@@ -16,9 +16,4 @@
     <ProjectReference Include="..\AnimeSpace.Application\AnimeSpace.Application.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Storage\" />
-    <Folder Include="Persistence\Seed\" />
-  </ItemGroup>
-
 </Project>

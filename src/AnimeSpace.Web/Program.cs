@@ -1,6 +1,7 @@
 using AnimeSpace.Domain.Entities;
 using AnimeSpace.Infrastructure;
 using AnimeSpace.Infrastructure.Persistence.Context;
+using AnimeSpace.Infrastructure.Persistence.Seed;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,12 +9,12 @@ namespace AnimeSpace.Web
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddInfrastructure(builder.Configuration);
+            builder.Services.AddInfrastructure(builder.Configuration, builder.Environment.WebRootPath);
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
             builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
@@ -29,6 +30,11 @@ namespace AnimeSpace.Web
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                await DbInitializer.InitializeAsync(scope.ServiceProvider);
+            }
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -57,6 +63,8 @@ namespace AnimeSpace.Web
                .WithStaticAssets();
 
             app.Run();
+
+            
         }
     }
 }

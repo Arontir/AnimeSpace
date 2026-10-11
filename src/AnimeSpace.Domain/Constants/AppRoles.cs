@@ -9,6 +9,6 @@
         /// <summary>
         /// Роль адміністратора: доступ до панелі керування (область Admin).
         /// </summary>
-        const string Admin = "Admin";
+        public const string Admin = "Admin";
     }
 }
