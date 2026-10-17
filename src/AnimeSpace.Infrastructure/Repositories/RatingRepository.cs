@@ -52,7 +52,6 @@ namespace AnimeSpace.Infrastructure.Repositories
         /// <inheritdoc/>
         public async Task UpdateAsync(Rating rating)
         {
-            db.Ratings.Update(rating);
             await db.SaveChangesAsync();
         }
     }

@@ -36,7 +36,6 @@ namespace AnimeSpace.Infrastructure.Repositories
         /// <inheritdoc/>
         public async Task UpdateAsync(Bookmark bookmark)
         {
-            db.Bookmarks.Update(bookmark);
             await db.SaveChangesAsync();
         }
 

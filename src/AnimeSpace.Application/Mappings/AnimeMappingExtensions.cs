@@ -39,7 +39,7 @@ namespace AnimeSpace.Application.Mappings
             AverageRating = anime.AverageRating,
             RatingsCount = anime.RatingsCount,
             PlayerUrl = anime.PlayerUrl,
-            Genres = anime.Genres.Select(g => g.ToDto()).OrderBy(g => g).ToList()
+            Genres = anime.Genres.OrderBy(g => g.Name).Select(g => g.ToDto()).ToList()
         };
 
         /// <summary>
