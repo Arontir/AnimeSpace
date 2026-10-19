@@ -1,0 +1,88 @@
+@model AnimeDetailsViewModel
+@{
+    var anime = Model.Anime;
+    ViewData["Title"] = anime.Title;
+
+    var poster = string.IsNullOrWhiteSpace(anime.PosterUrl)
+        ? Url.Content("~/images/no-poster.svg")
+        : anime.PosterUrl;
+}
+
+<div class="row g-4">
+    <div class="col-md-3">
+        <img src="@poster" class="img-fluid rounded poster" alt="@anime.Title" />
+    </div>
+
+    <div class="col-md-9">
+        <h1 class="h3">@anime.Title</h1>
+
+        <p class="text-secondary">
+            @anime.ReleaseYear
+            · <span class="badge @(anime.Status == AnimeStatus.Ongoing ? "text-bg-success" : "text-bg-secondary")">@anime.Status.ToDisplay()</span>
+            ·
+            @if (anime.RatingsCount > 0)
+            {
+                <span class="text-warning">★ @anime.AverageRating.ToString("0.0", CultureInfo.InvariantCulture)</span>
+                <span>(@anime.RatingsCount)</span>
+            }
+            else
+            {
+                <span>оцінок ще немає</span>
+            }
+        </p>
+
+        <p>
+            @foreach (var genre in anime.Genres)
+            {
+                <a class="badge text-bg-secondary text-decoration-none"
+                   asp-controller="Anime" asp-action="Catalog" asp-route-GenreId="@genre.Id">@genre.Name</a>
+            }
+        </p>
+
+        @if (!string.IsNullOrWhiteSpace(anime.Description))
+        {
+            <p class="comment-text">@anime.Description</p>
+        }
+
+    </div>
+</div>
+
+<hr class="my-4" />
+
+<h2 class="h5">Перегляд</h2>
+
+@if (string.IsNullOrWhiteSpace(anime.PlayerUrl))
+{
+    <div class="alert alert-secondary">Відео ще не додано.</div>
+}
+else
+{
+    <div class="ratio ratio-16x9 bg-black rounded overflow-hidden">
+        <iframe src="@anime.PlayerUrl"
+                title="Відеоплеєр"
+                allowfullscreen
+                allow="autoplay; fullscreen; picture-in-picture"
+                referrerpolicy="strict-origin-when-cross-origin"
+                loading="lazy"></iframe>
+    </div>
+}
+
+<h2 class="h5 mt-5" id="comments">Коментарі (@Model.Comments.Count)</h2>
+
+@if (Model.Comments.Count == 0)
+{
+    <p class="text-secondary">Коментарів ще немає.</p>
+}
+else
+{
+    @foreach (var comment in Model.Comments)
+    {
+        <div class="border-bottom py-3">
+            <div>
+                <strong>@comment.UserName</strong>
+                <small class="text-secondary ms-2">@comment.CreatedAt.ToString("dd.MM.yyyy HH:mm") UTC</small>
+            </div>
+            <div class="comment-text">@comment.Text</div>
+        </div>
+    }
+}

@@ -1,0 +1,71 @@
+@model CatalogViewModel
+@{
+    ViewData["Title"] = "Каталог";
+    var filter = Model.CurrentFilter;
+    var result = Model.AnimePagedList;
+}
+
+<div class="row g-4">
+    <aside class="col-lg-3">
+        <form method="get" asp-controller="Anime" asp-action="Catalog" class="card card-body">
+            <h2 class="h6">Фільтри</h2>
+
+            <label class="form-label small mt-2" for="SearchQuery">Назва</label>
+            <input class="form-control form-control-sm" id="SearchQuery" name="SearchQuery" value="@filter.SearchQuery" />
+
+            <label class="form-label small mt-2" for="GenreId">Жанр</label>
+            <select class="form-select form-select-sm" id="GenreId" name="GenreId">
+                <option value="">Усі жанри</option>
+                @foreach (var genre in Model.AvailableGenres)
+                {
+                    <option value="@genre.Id" selected="@(filter.GenreId == genre.Id)">@genre.Name</option>
+                }
+            </select>
+
+            <label class="form-label small mt-2" for="ReleaseYear">Рік виходу</label>
+            <input class="form-control form-control-sm" type="number" id="ReleaseYear" name="ReleaseYear" value="@filter.ReleaseYear" />
+
+            <label class="form-label small mt-2" for="Status">Статус</label>
+            <select class="form-select form-select-sm" id="Status" name="Status">
+                <option value="">Будь-який</option>
+                @foreach (var status in Enum.GetValues<AnimeStatus>())
+                {
+                    <option value="@((int)status)" selected="@(filter.Status == status)">@status.ToDisplay()</option>
+                }
+            </select>
+
+            <label class="form-label small mt-2" for="SortBy">Сортування</label>
+            <select class="form-select form-select-sm" id="SortBy" name="SortBy">
+                @foreach (var sort in Enum.GetValues<AnimeSortBy>())
+                {
+                    <option value="@((int)sort)" selected="@(filter.SortBy == sort)">@sort.ToDisplay()</option>
+                }
+            </select>
+
+            <div class="d-flex gap-2 mt-3">
+                <button class="btn btn-primary btn-sm flex-grow-1" type="submit">Застосувати</button>
+                <a class="btn btn-outline-secondary btn-sm" asp-controller="Anime" asp-action="Catalog">Скинути</a>
+            </div>
+        </form>
+    </aside>
+
+    <section class="col-lg-9">
+        <p class="text-secondary small">Знайдено: @result.TotalCount</p>
+
+        @if (result.Items.Count == 0)
+        {
+            <div class="alert alert-secondary">За обраними умовами нічого не знайдено.</div>
+        }
+        else
+        {
+            <div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 g-3">
+                @foreach (var anime in result.Items)
+                {
+                    <partial name="_AnimeCard" model="anime" />
+                }
+            </div>
+        }
+
+        <partial name="_Pagination" model="result" />
+    </section>
+</div>
