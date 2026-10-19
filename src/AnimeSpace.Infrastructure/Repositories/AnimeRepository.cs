@@ -140,7 +140,6 @@ namespace AnimeSpace.Infrastructure.Repositories
         /// <inheritdoc/>
         public async Task UpdateAsync(Anime anime)
         {
-            db.Animes.Update(anime);
             await db.SaveChangesAsync();
         }
 

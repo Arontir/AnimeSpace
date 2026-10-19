@@ -49,7 +49,6 @@ namespace AnimeSpace.Infrastructure.Repositories
         /// <inheritdoc/>
         public async Task UpdateAsync(Genre genre)
         {
-            db.Genres.Update(genre);
             await db.SaveChangesAsync();
         }
 
