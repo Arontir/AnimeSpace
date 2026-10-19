@@ -1,9 +1,10 @@
+using AnimeSpace.Application;
 using AnimeSpace.Domain.Entities;
 using AnimeSpace.Infrastructure;
 using AnimeSpace.Infrastructure.Persistence.Context;
 using AnimeSpace.Infrastructure.Persistence.Seed;
+using AnimeSpace.Web.Filters;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace AnimeSpace.Web
 {
@@ -15,6 +16,7 @@ namespace AnimeSpace.Web
 
             // Add services to the container.
             builder.Services.AddInfrastructure(builder.Configuration, builder.Environment.WebRootPath);
+            builder.Services.AddApplication();
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
             builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
@@ -27,7 +29,8 @@ namespace AnimeSpace.Web
             })
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>();
-            builder.Services.AddControllersWithViews();
+
+            builder.Services.AddControllersWithViews(options => options.Filters.Add<GlobalExceptionFilter>());
 
             var app = builder.Build();
 
@@ -49,6 +52,7 @@ namespace AnimeSpace.Web
             }
 
             app.UseHttpsRedirection();
+            app.UseStaticFiles();
             app.UseRouting();
 
             app.UseAuthentication();
@@ -64,7 +68,7 @@ namespace AnimeSpace.Web
 
             app.Run();
 
-            
+
         }
     }
 }
