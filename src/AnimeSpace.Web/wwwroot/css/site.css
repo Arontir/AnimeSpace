@@ -5,6 +5,13 @@
     background: #1f2328;
 }
 
+.poster-thumb {
+    width: 40px;
+    height: 60px;
+    object-fit: cover;
+    background: #1f2328;
+}
+
 .anime-card {
     transition: transform .15s ease, box-shadow .15s ease;
 }

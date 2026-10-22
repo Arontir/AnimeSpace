@@ -6,6 +6,9 @@
     var poster = string.IsNullOrWhiteSpace(anime.PosterUrl)
         ? Url.Content("~/images/no-poster.svg")
         : anime.PosterUrl;
+
+    var isSignedIn = Model.CurrentUserId is not null;
+    var isAdmin = User.IsInRole(AppRoles.Admin);
 }
 
 <div class="row g-4">
@@ -22,12 +25,11 @@
             ·
             @if (anime.RatingsCount > 0)
             {
-                <span class="text-warning">★ @anime.AverageRating.ToString("0.0", CultureInfo.InvariantCulture)</span>
-                <span>(@anime.RatingsCount)</span>
+                <span id="rating-summary" class="text-warning">★ @anime.AverageRating.ToString("0.0", CultureInfo.InvariantCulture) (@anime.RatingsCount)</span>
             }
             else
             {
-                <span>оцінок ще немає</span>
+                <span id="rating-summary" class="text-secondary">оцінок ще немає</span>
             }
         </p>
 
@@ -44,6 +46,45 @@
             <p class="comment-text">@anime.Description</p>
         }
 
+        @if (isSignedIn)
+        {
+            <div class="d-flex flex-wrap gap-3 align-items-center mt-3">
+
+                <div class="d-flex align-items-center gap-2" data-bookmark-box>
+                    <select class="form-select form-select-sm w-auto" data-bookmark-select
+                            data-anime-id="@anime.Id" aria-label="Статус у списку">
+                        <option value="">Додати до списку…</option>
+                        @foreach (var status in Enum.GetValues<WatchStatus>())
+                        {
+                            <option value="@((int)status)" selected="@(Model.CurrentUserBookmarkStatus == status)">@status.ToDisplay()</option>
+                        }
+                    </select>
+                    <button type="button" data-bookmark-remove data-anime-id="@anime.Id"
+                            class="btn btn-sm btn-outline-secondary @(Model.CurrentUserBookmarkStatus is null ? "d-none" : "")">Прибрати</button>
+                    <span class="small" data-bookmark-feedback></span>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    <select id="rating-select" class="form-select form-select-sm w-auto"
+                            data-anime-id="@anime.Id" aria-label="Ваша оцінка">
+                        <option value="">Ваша оцінка…</option>
+                        @for (var score = 10; score >= 1; score--)
+                        {
+                            <option value="@score" selected="@(Model.CurrentUserRating == score)">@score</option>
+                        }
+                    </select>
+                    <span id="rating-feedback" class="small"></span>
+                </div>
+            </div>
+        }
+        else
+        {
+            <p class="small text-secondary mt-3">
+                <a asp-area="Identity" asp-page="/Account/Login"
+                   asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)">Увійдіть</a>,
+                щоб оцінювати, додавати тайтли до списку та коментувати.
+            </p>
+        }
     </div>
 </div>
 
@@ -67,22 +108,57 @@ else
     </div>
 }
 
-<h2 class="h5 mt-5" id="comments">Коментарі (@Model.Comments.Count)</h2>
+<h2 class="h5 mt-5" id="comments">Коментарі (<span id="comment-count">@Model.Comments.Count</span>)</h2>
 
-@if (Model.Comments.Count == 0)
+@if (isSignedIn)
 {
-    <p class="text-secondary">Коментарів ще немає.</p>
+    <form id="comment-form" class="mb-4" data-anime-id="@anime.Id">
+        <textarea name="text" class="form-control mb-2" rows="3" maxlength="2000" required
+                  placeholder="Напишіть коментар…"></textarea>
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-primary btn-sm" type="submit">Надіслати</button>
+            <span id="comment-feedback" class="small"></span>
+        </div>
+    </form>
 }
-else
-{
+
+<p id="no-comments" class="text-secondary @(Model.Comments.Count > 0 ? "d-none" : "")">Коментарів ще немає.</p>
+
+<div id="comment-list">
     @foreach (var comment in Model.Comments)
     {
-        <div class="border-bottom py-3">
-            <div>
-                <strong>@comment.UserName</strong>
-                <small class="text-secondary ms-2">@comment.CreatedAt.ToString("dd.MM.yyyy HH:mm") UTC</small>
+        <div class="border-bottom py-3 comment-item" data-comment-id="@comment.Id">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <strong class="comment-author">@comment.UserName</strong>
+                    <small class="text-secondary ms-2 comment-date">@comment.CreatedAt.ToString("dd.MM.yyyy HH:mm") UTC</small>
+                </div>
+
+                @if (isSignedIn && (isAdmin || comment.UserId == Model.CurrentUserId))
+                {
+                    <button type="button" class="btn btn-link btn-sm text-danger p-0 comment-delete"
+                            data-comment-id="@comment.Id">Видалити</button>
+                }
             </div>
             <div class="comment-text">@comment.Text</div>
         </div>
     }
+</div>
+
+<template id="comment-template">
+    <div class="border-bottom py-3 comment-item">
+        <div class="d-flex justify-content-between">
+            <div>
+                <strong class="comment-author"></strong>
+                <small class="text-secondary ms-2 comment-date"></small>
+            </div>
+            <button type="button" class="btn btn-link btn-sm text-danger p-0 comment-delete">Видалити</button>
+        </div>
+        <div class="comment-text"></div>
+    </div>
+</template>
+
+@section Scripts {
+    <script src="~/js/anime-details.js" asp-append-version="true"></script>
+    <script src="~/js/bookmarks.js" asp-append-version="true"></script>
 }

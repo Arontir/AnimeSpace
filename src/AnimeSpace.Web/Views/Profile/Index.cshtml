@@ -1,0 +1,76 @@
+@model ProfileViewModel
+@{
+    ViewData["Title"] = "Мій кабінет";
+
+    var statuses = new[] { WatchStatus.Watching, WatchStatus.Planned, WatchStatus.Completed, WatchStatus.Dropped };
+}
+
+<h1 class="h3">Мій кабінет</h1>
+<p class="text-secondary">
+    @Model.UserName · на сайті з @Model.RegisteredAt.ToString("dd.MM.yyyy") ·
+    <a asp-area="Identity" asp-page="/Account/Manage/Index">Змінити дані облікового запису</a>
+</p>
+
+<ul class="nav nav-tabs mb-3" id="profileTabs" role="tablist">
+    @foreach (var status in statuses)
+    {
+        <li class="nav-item" role="presentation">
+            <button class="nav-link @(status == statuses[0] ? "active" : "")" type="button" role="tab"
+                    data-bs-toggle="tab" data-bs-target="#tab-@status">
+                @status.ToDisplay()
+                <span class="badge text-bg-secondary">@Model.Bookmarks.Count(b => b.Status == status)</span>
+            </button>
+        </li>
+    }
+</ul>
+
+<div class="tab-content">
+    @foreach (var status in statuses)
+    {
+        var items = Model.Bookmarks.Where(b => b.Status == status).ToList();
+
+        <div class="tab-pane fade @(status == statuses[0] ? "show active" : "")" id="tab-@status" role="tabpanel">
+            @if (items.Count == 0)
+            {
+                <p class="text-secondary">
+                    Тут поки порожньо. <a asp-controller="Anime" asp-action="Catalog">Перейти до каталогу</a>.
+                </p>
+            }
+            else
+            {
+                <div class="list-group">
+                    @foreach (var item in items)
+                    {
+                        var poster = string.IsNullOrWhiteSpace(item.AnimePosterUrl)
+                            ? Url.Content("~/images/no-poster.svg")
+                            : item.AnimePosterUrl;
+
+                        <div class="list-group-item d-flex align-items-center gap-3" data-bookmark-box>
+                            <img src="@poster" alt="" class="poster-thumb rounded" />
+
+                            <a class="me-auto text-decoration-none"
+                               asp-controller="Anime" asp-action="Details" asp-route-id="@item.AnimeId">@item.AnimeTitle</a>
+
+                            <select class="form-select form-select-sm w-auto" data-bookmark-select data-reload="true"
+                                    data-anime-id="@item.AnimeId" aria-label="Змінити статус">
+                                @foreach (var option in statuses)
+                                {
+                                    <option value="@((int)option)" selected="@(item.Status == option)">@option.ToDisplay()</option>
+                                }
+                            </select>
+
+                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                    data-bookmark-remove data-reload="true" data-anime-id="@item.AnimeId">Прибрати</button>
+
+                            <span class="small text-danger" data-bookmark-feedback></span>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/js/bookmarks.js" asp-append-version="true"></script>
+}
