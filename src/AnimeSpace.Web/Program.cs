@@ -3,8 +3,10 @@ using AnimeSpace.Domain.Entities;
 using AnimeSpace.Infrastructure;
 using AnimeSpace.Infrastructure.Persistence.Context;
 using AnimeSpace.Infrastructure.Persistence.Seed;
+using AnimeSpace.Web.Extensions;
 using AnimeSpace.Web.Filters;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AnimeSpace.Web
 {
@@ -30,7 +32,43 @@ namespace AnimeSpace.Web
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            builder.Services.AddControllersWithViews(options => options.Filters.Add<GlobalExceptionFilter>());
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.Events.OnRedirectToLogin = context =>
+                {
+                    if (context.Request.IsAjax())
+                    {
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    }
+                    else
+                    {
+                        context.Response.Redirect(context.RedirectUri);
+                    }
+                    return Task.CompletedTask;
+                };
+
+                options.Events.OnRedirectToAccessDenied = context =>
+                {
+                    if (context.Request.IsAjax())
+                    {
+                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                    }
+                    else
+                    {
+                        context.Response.Redirect(context.RedirectUri);
+                    }
+                    return Task.CompletedTask;
+                };
+            });
+
+            builder.Services.AddAntiforgery(o => o.HeaderName = "RequestVerificationToken");
+
+            builder.Services.AddControllersWithViews(options =>
+            {
+                options.Filters.Add<GlobalExceptionFilter>();
+
+                options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+            });
 
             var app = builder.Build();
 
@@ -52,6 +90,7 @@ namespace AnimeSpace.Web
             }
 
             app.UseHttpsRedirection();
+
             app.UseStaticFiles();
             app.UseRouting();
 
@@ -59,16 +98,20 @@ namespace AnimeSpace.Web
             app.UseAuthorization();
 
             app.MapStaticAssets();
+
+            app.MapControllerRoute(
+                name: "areas",
+                pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
+
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}")
                 .WithStaticAssets();
+
             app.MapRazorPages()
                .WithStaticAssets();
 
             app.Run();
-
-
         }
     }
 }
