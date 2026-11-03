@@ -10,7 +10,8 @@ namespace AnimeSpace.Application.DTOs
         /// <summary>
         /// Назва жанру (обов'язкова, до 100 символів, унікальна).
         /// </summary>
-        [Required, StringLength(100)]
+        [Required(ErrorMessage = "Вкажіть назву жанру.")]
+        [StringLength(100, ErrorMessage = "Назва жанру має бути не довшою за 100 символів.")]
         public string Name { get; set; } = string.Empty;
     }
 }
