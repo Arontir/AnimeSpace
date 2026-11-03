@@ -1,0 +1,64 @@
+@model PagedResult<AnimeCardDto>
+@{
+    ViewData["Title"] = "Тайтли";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Тайтли (@Model.TotalCount)</h1>
+    <a class="btn btn-primary btn-sm" asp-action="Create">+ Новий тайтл</a>
+</div>
+
+@if (Model.Items.Count == 0)
+{
+    <div class="alert alert-secondary">Тайтлів ще немає.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Назва</th>
+                    <th>Рік</th>
+                    <th>Статус</th>
+                    <th>Жанри</th>
+                    <th>Рейтинг</th>
+                    <th class="text-end">Дії</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var anime in Model.Items)
+                {
+                    <tr>
+                        <td><a class="text-decoration-none" asp-area="" asp-controller="Anime" asp-action="Details" asp-route-id="@anime.Id">@anime.Title</a></td>
+                        <td>@anime.ReleaseYear</td>
+                        <td>@anime.Status.ToDisplay()</td>
+                        <td>@string.Join(", ", anime.GenreNames)</td>
+                        <td>
+                            @if (anime.RatingsCount > 0)
+                            {
+                                <span>@anime.AverageRating.ToString("0.0", CultureInfo.InvariantCulture) (@anime.RatingsCount)</span>
+                            }
+                            else
+                            {
+                                <span class="text-secondary">-</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <div class="d-inline-flex gap-1">
+                                <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@anime.Id">Редагувати</a>
+
+                                <form asp-action="Delete" asp-route-id="@anime.Id" method="post"
+                                      data-confirm="Видалити «@anime.Title» разом з оцінками, коментарями та закладками?">
+                                    <button class="btn btn-sm btn-outline-danger" type="submit">Видалити</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <partial name="_Pagination" model="Model" />
+}

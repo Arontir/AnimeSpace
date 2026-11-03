@@ -1,0 +1,38 @@
+@model DashboardStatsDto
+@{
+    ViewData["Title"] = "Статистика";
+}
+
+<h1 class="h3 mb-4">Статистика сайту</h1>
+
+<div class="row g-3">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card card-body">
+            <div class="text-secondary small">Користувачі</div>
+            <div class="display-6">@Model.UsersCount</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card card-body">
+            <div class="text-secondary small">Тайтли</div>
+            <div class="display-6">@Model.AnimeCount</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card card-body">
+            <div class="text-secondary small">Жанри</div>
+            <div class="display-6">@Model.GenresCount</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card card-body">
+            <div class="text-secondary small">Коментарі</div>
+            <div class="display-6">@Model.CommentsCount</div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4 d-flex gap-2">
+    <a class="btn btn-primary" asp-controller="AnimeManager" asp-action="Create">Додати тайтл</a>
+    <a class="btn btn-outline-secondary" asp-controller="GenreManager" asp-action="Index">Керувати жанрами</a>
+</div>

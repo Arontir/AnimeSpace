@@ -1,0 +1,79 @@
+@model AnimeFormViewModel
+
+<div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+<input type="hidden" asp-for="Anime.Id" />
+<input type="hidden" asp-for="Anime.CurrentPosterUrl" />
+
+<div class="mb-3">
+    <label asp-for="Anime.Title" class="form-label">Назва</label>
+    <input asp-for="Anime.Title" class="form-control" />
+    <span asp-validation-for="Anime.Title" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="Anime.Description" class="form-label">Опис</label>
+    <textarea asp-for="Anime.Description" class="form-control" rows="5"></textarea>
+    <span asp-validation-for="Anime.Description" class="text-danger"></span>
+</div>
+
+<div class="row">
+    <div class="col-md-3 mb-3">
+        <label asp-for="Anime.ReleaseYear" class="form-label">Рік виходу</label>
+        <input asp-for="Anime.ReleaseYear" type="number" class="form-control" />
+        <span asp-validation-for="Anime.ReleaseYear" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <label class="form-label" for="Anime_Status">Статус</label>
+        <select class="form-select" id="Anime_Status" name="Anime.Status">
+            @foreach (var status in Enum.GetValues<AnimeStatus>())
+            {
+                <option value="@((int)status)" selected="@(Model.Anime.Status == status)">@status.ToDisplay()</option>
+            }
+        </select>
+    </div>
+</div>
+
+<div class="mb-3">
+    <label class="form-label">Постер</label>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Anime.CurrentPosterUrl))
+    {
+        <div class="mb-2">
+            <img src="@Model.Anime.CurrentPosterUrl" alt="Поточний постер" class="rounded" style="height: 140px" />
+            <div class="form-text">Поточний постер. Новий файл або посилання замінить його; якщо нічого не вказувати, він залишиться.</div>
+        </div>
+    }
+
+    <input type="file" asp-for="PosterFile" class="form-control mb-2" accept=".jpg,.jpeg,.png,.webp" />
+    <div class="form-text mb-2">Файл .jpg, .jpeg, .png або .webp, до 5 МБ.</div>
+
+    <input asp-for="Anime.PosterUrl" class="form-control" placeholder="…або посилання на зображення (https://…)" />
+    <span asp-validation-for="Anime.PosterUrl" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="Anime.PlayerUrl" class="form-label">Посилання на плеєр</label>
+    <input asp-for="Anime.PlayerUrl" class="form-control" placeholder="https://www.youtube.com/embed?listType=playlist&list=PLAYLIST_ID" />
+    <div class="form-text">
+        Посилання на iframe-плеєр для всього тайтлу (https). Серії та озвучки перемикає сам плеєр.
+        Порожнє поле означає «відео ще не додано».
+    </div>
+    <span asp-validation-for="Anime.PlayerUrl" class="text-danger"></span>
+</div>
+
+<fieldset class="mb-3">
+    <legend class="form-label fs-6">Жанри</legend>
+    <div class="d-flex flex-wrap gap-3">
+        @foreach (var genre in Model.AllGenres)
+        {
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="genre-@genre.Id"
+                       name="Anime.SelectedGenreIds" value="@genre.Id"
+                       checked="@Model.Anime.SelectedGenreIds.Contains(genre.Id)" />
+                <label class="form-check-label" for="genre-@genre.Id">@genre.Name</label>
+            </div>
+        }
+    </div>
+</fieldset>

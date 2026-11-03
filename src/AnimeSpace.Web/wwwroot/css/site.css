@@ -1,3 +1,7 @@
+/* Темна тема вмикається атрибутом data-bs-theme="dark" на <html> (Bootstrap 5.3).
+   Тут лише доповнення до Bootstrap. */
+
+/* Постер: фіксовані пропорції 2:3, щоб сітка була рівною навіть із різними зображеннями. */
 .poster {
     aspect-ratio: 2 / 3;
     object-fit: cover;
@@ -5,6 +9,7 @@
     background: #1f2328;
 }
 
+/* Мініатюра постера в списках особистого кабінету. */
 .poster-thumb {
     width: 40px;
     height: 60px;
@@ -12,6 +17,7 @@
     background: #1f2328;
 }
 
+/* Картка тайтлу трохи піднімається при наведенні. */
 .anime-card {
     transition: transform .15s ease, box-shadow .15s ease;
 }
@@ -21,6 +27,7 @@
     box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .4);
 }
 
+/* Слайдер на головній. */
 .hero-slide {
     min-height: 320px;
     background: linear-gradient(135deg, #1f2937, #111827);
@@ -33,7 +40,30 @@
     background: #1f2328;
 }
 
+/* Текст користувача зберігає переноси рядків і не розтягує сторінку довгими словами. */
 .comment-text {
     white-space: pre-wrap;
     overflow-wrap: anywhere;
+}
+
+/* Панель адміністратора: бічне меню. */
+.admin-sidebar {
+    min-height: 100vh;
+    width: 220px;
+}
+
+@media (max-width: 768px) {
+    .admin-sidebar {
+        width: 150px;
+    }
+}
+
+/* Кнопки серій під плеєром (плейлисти YouTube): якщо серій багато, список прокручується. */
+.episode-grid {
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.episode-btn {
+    min-width: 2.5rem;
 }

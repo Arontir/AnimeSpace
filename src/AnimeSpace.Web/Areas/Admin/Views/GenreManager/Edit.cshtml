@@ -1,0 +1,23 @@
+@model GenreDto
+@{
+    ViewData["Title"] = "Перейменування жанру";
+}
+
+<h1 class="h3 mb-4">Перейменування жанру</h1>
+
+<form asp-action="Edit" asp-route-id="@Model.Id" method="post" style="max-width: 420px">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+    <div class="mb-3">
+        <label for="Name" class="form-label">Назва</label>
+        <input id="Name" name="Name" value="@Model.Name" class="form-control" maxlength="100" required />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <button class="btn btn-primary" type="submit">Зберегти</button>
+    <a class="btn btn-outline-secondary" asp-action="Index">Скасувати</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

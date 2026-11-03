@@ -13,7 +13,7 @@
     <header>
         <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom">
             <div class="container">
-                <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">AnimeSpace</a>
+                <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">AnimeSpace</a>
 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
                         aria-controls="mainNav" aria-expanded="false" aria-label="Меню">
@@ -23,17 +23,23 @@
                 <div class="collapse navbar-collapse" id="mainNav">
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Anime" asp-action="Catalog">Каталог</a>
+                            <a class="nav-link" asp-area="" asp-controller="Anime" asp-action="Catalog">Каталог</a>
                         </li>
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Profile" asp-action="Index">Мій кабінет</a>
+                                <a class="nav-link" asp-area="" asp-controller="Profile" asp-action="Index">Мій кабінет</a>
+                            </li>
+                        }
+                        @if (User.IsInRole(AppRoles.Admin))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Адмінка</a>
                             </li>
                         }
                     </ul>
 
-                    <form class="d-flex me-lg-3 my-2 my-lg-0" method="get" asp-controller="Anime" asp-action="Catalog">
+                    <form class="d-flex me-lg-3 my-2 my-lg-0" method="get" asp-area="" asp-controller="Anime" asp-action="Catalog">
                         <input class="form-control form-control-sm me-2" type="search" name="SearchQuery"
                                placeholder="Пошук за назвою" aria-label="Пошук" />
                         <button class="btn btn-sm btn-outline-light" type="submit">Знайти</button>

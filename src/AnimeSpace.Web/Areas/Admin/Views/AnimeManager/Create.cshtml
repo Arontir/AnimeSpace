@@ -1,0 +1,17 @@
+@model AnimeFormViewModel
+@{
+    ViewData["Title"] = "Новий тайтл";
+}
+
+<h1 class="h3 mb-4">Новий тайтл</h1>
+
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    <partial name="_AnimeForm" model="Model" />
+
+    <button class="btn btn-primary" type="submit">Створити</button>
+    <a class="btn btn-outline-secondary" asp-action="Index">Скасувати</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

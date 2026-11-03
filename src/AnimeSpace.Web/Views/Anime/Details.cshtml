@@ -9,6 +9,28 @@
 
     var isSignedIn = Model.CurrentUserId is not null;
     var isAdmin = User.IsInRole(AppRoles.Admin);
+
+    var playerSrc = anime.PlayerUrl ?? string.Empty;
+    var isYouTubePlaylist = false;
+
+    if (Uri.TryCreate(playerSrc, UriKind.Absolute, out var playerUri)
+        && (playerUri.Host is "www.youtube.com" or "youtube.com" or "www.youtube-nocookie.com")
+        && playerUri.AbsolutePath.StartsWith("/embed", StringComparison.OrdinalIgnoreCase)
+        && playerUri.Query.Contains("list=", StringComparison.OrdinalIgnoreCase))
+    {
+        isYouTubePlaylist = true;
+
+        if (!playerUri.Query.Contains("enablejsapi=", StringComparison.OrdinalIgnoreCase))
+        {
+            playerSrc += "&enablejsapi=1";
+        }
+
+        if (!playerUri.Query.Contains("origin=", StringComparison.OrdinalIgnoreCase))
+        {
+            var origin = Uri.EscapeDataString($"{Context.Request.Scheme}://{Context.Request.Host}");
+            playerSrc += $"&origin={origin}";
+        }
+    }
 }
 
 <div class="row g-4">
@@ -99,13 +121,23 @@
 else
 {
     <div class="ratio ratio-16x9 bg-black rounded overflow-hidden">
-        <iframe src="@anime.PlayerUrl"
+        <iframe id="player"
+                src="@playerSrc"
                 title="Відеоплеєр"
                 allowfullscreen
                 allow="autoplay; fullscreen; picture-in-picture"
                 referrerpolicy="strict-origin-when-cross-origin"
-                loading="lazy"></iframe>
+                loading="@(isYouTubePlaylist ? "eager" : "lazy")"
+                data-youtube-playlist="@(isYouTubePlaylist ? "true" : null)"></iframe>
     </div>
+
+    @if (isYouTubePlaylist)
+    {
+        <div id="episode-panel" class="mt-3 d-none">
+            <h3 class="h6">Серії</h3>
+            <div id="episode-list" class="episode-grid d-flex flex-wrap gap-1"></div>
+        </div>
+    }
 }
 
 <h2 class="h5 mt-5" id="comments">Коментарі (<span id="comment-count">@Model.Comments.Count</span>)</h2>
@@ -161,4 +193,5 @@ else
 @section Scripts {
     <script src="~/js/anime-details.js" asp-append-version="true"></script>
     <script src="~/js/bookmarks.js" asp-append-version="true"></script>
+    <script src="~/js/youtube-playlist.js" asp-append-version="true"></script>
 }
