@@ -12,9 +12,12 @@ namespace AnimeSpace.Web.Areas.Admin.Controllers
     /// Якщо жанру немає, сервіс кидає NotFoundException, а фільтр показує сторінку 404.
     /// </summary>
     /// <param name="genreService">Сервіс жанрів.</param>
+    /// <param name="logger">Журнал: у нього записуються дії адміністратора.</param>
     [Area("Admin")]
     [Authorize(Roles = AppRoles.Admin)]
-    public class GenreManagerController(IGenreService genreService) : Controller
+    public class GenreManagerController(
+        IGenreService genreService,
+        ILogger<GenreManagerController> logger) : Controller
     {
         /// <summary>
         /// Список жанрів і форма додавання.
@@ -43,7 +46,9 @@ namespace AnimeSpace.Web.Areas.Admin.Controllers
 
             try
             {
-                await genreService.CreateAsync(dto);
+                var id = await genreService.CreateAsync(dto);
+                logger.LogInformation("Адміністратор {Admin} створив жанр Id:{GenreId} «{Name}»",
+                    User.Identity?.Name, id, dto.Name);
                 TempData["Success"] = "Жанр успішно створено.";
             }
             catch (ValidationException e)
@@ -82,6 +87,8 @@ namespace AnimeSpace.Web.Areas.Admin.Controllers
             try
             {
                 await genreService.UpdateAsync(id, dto);
+                logger.LogInformation("Адміністратор {Admin} перейменував жанр Id:{GenreId} на «{Name}»",
+                    User.Identity?.Name, id, dto.Name);
                 TempData["Success"] = "Жанр успішно оновлено.";
 
                 return RedirectToAction(nameof(Index));
@@ -102,6 +109,7 @@ namespace AnimeSpace.Web.Areas.Admin.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             await genreService.DeleteAsync(id);
+            logger.LogInformation("Адміністратор {Admin} видалив жанр Id:{GenreId}", User.Identity?.Name, id);
             TempData["Success"] = "Жанр успішно видалено.";
 
             return RedirectToAction(nameof(Index));

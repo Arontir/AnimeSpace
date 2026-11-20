@@ -14,9 +14,13 @@ namespace AnimeSpace.Web.Areas.Admin.Controllers
     /// </summary>
     /// <param name="animeService">Сервіс тайтлів.</param>
     /// <param name="genreService">Сервіс жанрів (для прапорців жанрів у формі).</param>
+    /// <param name="logger">Журнал: у нього записуються дії адміністратора.</param>
     [Area("Admin")]
     [Authorize(Roles = AppRoles.Admin)]
-    public class AnimeManagerController(IAnimeService animeService, IGenreService genreService) : Controller
+    public class AnimeManagerController(
+        IAnimeService animeService,
+        IGenreService genreService,
+        ILogger<AnimeManagerController> logger) : Controller
     {
         /// <summary>
         /// Таблиця тайтлів із пагінацією (15 на сторінку).
@@ -59,7 +63,9 @@ namespace AnimeSpace.Web.Areas.Admin.Controllers
 
                 try
                 {
-                    await animeService.CreateAsync(model.Anime, ToUpload(model.PosterFile, stream));
+                    var id = await animeService.CreateAsync(model.Anime, ToUpload(model.PosterFile, stream));
+                    logger.LogInformation("Адміністратор {Admin} створив тайтл Id:{AnimeId} «{Title}»",
+                        User.Identity?.Name, id, model.Anime.Title);
                     TempData["Success"] = "Аніме успішно додано.";
 
                     return RedirectToAction(nameof(Index));
@@ -112,6 +118,8 @@ namespace AnimeSpace.Web.Areas.Admin.Controllers
                 try
                 {
                     await animeService.UpdateAsync(model.Anime, ToUpload(model.PosterFile, stream));
+                    logger.LogInformation("Адміністратор {Admin} оновив тайтл Id:{AnimeId} «{Title}»",
+                        User.Identity?.Name, model.Anime.Id, model.Anime.Title);
                     TempData["Success"] = "Аніме успішно оновлено.";
 
                     return RedirectToAction(nameof(Index));
@@ -135,6 +143,7 @@ namespace AnimeSpace.Web.Areas.Admin.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             await animeService.DeleteAsync(id);
+            logger.LogInformation("Адміністратор {Admin} видалив тайтл Id:{AnimeId}", User.Identity?.Name, id);
 
             TempData["Success"] = "Аніме видалено.";
 
@@ -142,7 +151,7 @@ namespace AnimeSpace.Web.Areas.Admin.Controllers
         }
 
         /// <summary>
-        /// Перетворює файл форми на DTO для сервісу. Без файлу повертає <c>null</c>.
+        /// Перетворює файл форми на DTO для сервісу (шар Application не знає про IFormFile). Без файлу повертає <c>null</c>.
         /// </summary>
         /// <param name="file">Файл із форми.</param>
         /// <param name="stream">Відкритий потік цього файлу.</param>

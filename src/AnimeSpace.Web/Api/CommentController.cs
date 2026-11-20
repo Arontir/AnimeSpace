@@ -12,10 +12,13 @@ namespace AnimeSpace.Web.Api
     /// Список коментарів тут не віддається: він приходить разом зі сторінкою тайтлу.
     /// </summary>
     /// <param name="commentService">Сервіс коментарів.</param>
+    /// <param name="logger">Журнал: у нього записується видалення коментарів (модерація).</param>
     [Route("[controller]/[action]")]
     [ApiController]
     [Authorize]
-    public class CommentController(ICommentService commentService) : ControllerBase
+    public class CommentController(
+        ICommentService commentService,
+        ILogger<CommentController> logger) : ControllerBase
     {
         /// <summary>
         /// Додає коментар від імені поточного користувача.
@@ -49,6 +52,9 @@ namespace AnimeSpace.Web.Api
                 commentId: id,
                 userId: userId,
                 isAdmin: isAdmin);
+
+            logger.LogInformation("Користувач {User} (адміністратор: {IsAdmin}) видалив коментар Id:{CommentId}",
+                User.Identity?.Name, isAdmin, id);
 
             return Ok();
         }

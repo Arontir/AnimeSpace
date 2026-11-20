@@ -7,6 +7,7 @@ using AnimeSpace.Web.Extensions;
 using AnimeSpace.Web.Filters;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 
 namespace AnimeSpace.Web
 {
@@ -14,104 +15,131 @@ namespace AnimeSpace.Web
     {
         public static async Task Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .CreateBootstrapLogger();
 
-            // Add services to the container.
-            builder.Services.AddInfrastructure(builder.Configuration, builder.Environment.WebRootPath);
-            builder.Services.AddApplication();
-            builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
-            builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
+            try
             {
-                options.SignIn.RequireConfirmedAccount = false;
-                options.Password.RequireDigit = false;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequiredLength = 6;
-            })
-            .AddRoles<IdentityRole>()
-            .AddEntityFrameworkStores<ApplicationDbContext>();
+                var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.ConfigureApplicationCookie(options =>
-            {
-                options.Events.OnRedirectToLogin = context =>
+                builder.Host.UseSerilog((context, services, configuration) => configuration
+                    .ReadFrom.Configuration(context.Configuration)
+                    .ReadFrom.Services(services)
+                    .Enrich.FromLogContext()
+                    .WriteTo.Console()
+                    .WriteTo.File(
+                        path: Path.Combine(context.HostingEnvironment.ContentRootPath, "logs", "animespace-.log"),
+                        rollingInterval: RollingInterval.Day,
+                        retainedFileCountLimit: 14,
+                        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}"));
+
+                // Add services to the container.
+                builder.Services.AddInfrastructure(builder.Configuration, builder.Environment.WebRootPath);
+                builder.Services.AddApplication();
+                builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+                builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
                 {
-                    if (context.Request.IsAjax())
-                    {
-                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    }
-                    else
-                    {
-                        context.Response.Redirect(context.RedirectUri);
-                    }
-                    return Task.CompletedTask;
-                };
+                    options.SignIn.RequireConfirmedAccount = false;
+                    options.Password.RequireDigit = false;
+                    options.Password.RequireNonAlphanumeric = false;
+                    options.Password.RequireUppercase = false;
+                    options.Password.RequiredLength = 6;
+                })
+                .AddRoles<IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>();
 
-                options.Events.OnRedirectToAccessDenied = context =>
+                builder.Services.ConfigureApplicationCookie(options =>
                 {
-                    if (context.Request.IsAjax())
+                    options.Events.OnRedirectToLogin = context =>
                     {
-                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
-                    }
-                    else
+                        if (context.Request.IsAjax())
+                        {
+                            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        }
+                        else
+                        {
+                            context.Response.Redirect(context.RedirectUri);
+                        }
+                        return Task.CompletedTask;
+                    };
+
+                    options.Events.OnRedirectToAccessDenied = context =>
                     {
-                        context.Response.Redirect(context.RedirectUri);
-                    }
-                    return Task.CompletedTask;
-                };
-            });
+                        if (context.Request.IsAjax())
+                        {
+                            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        }
+                        else
+                        {
+                            context.Response.Redirect(context.RedirectUri);
+                        }
+                        return Task.CompletedTask;
+                    };
+                });
 
-            builder.Services.AddAntiforgery(o => o.HeaderName = "RequestVerificationToken");
+                builder.Services.AddAntiforgery(o => o.HeaderName = "RequestVerificationToken");
 
-            builder.Services.AddControllersWithViews(options =>
-            {
-                options.Filters.Add<GlobalExceptionFilter>();
+                builder.Services.AddControllersWithViews(options =>
+                {
+                    options.Filters.Add<GlobalExceptionFilter>();
 
-                options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
-            });
+                    options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+                });
 
-            var app = builder.Build();
+                var app = builder.Build();
 
-            using (var scope = app.Services.CreateScope())
-            {
-                await DbInitializer.InitializeAsync(scope.ServiceProvider);
+                using (var scope = app.Services.CreateScope())
+                {
+                    await DbInitializer.InitializeAsync(scope.ServiceProvider);
+                }
+
+                // Configure the HTTP request pipeline.
+                if (app.Environment.IsDevelopment())
+                {
+                    app.UseMigrationsEndPoint();
+                }
+                else
+                {
+                    app.UseExceptionHandler("/Home/Error");
+                    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                    app.UseHsts();
+                }
+
+                app.UseHttpsRedirection();
+
+                app.UseStaticFiles();
+                app.UseRouting();
+
+                app.UseAuthentication();
+                app.UseAuthorization();
+
+                app.MapStaticAssets();
+
+                app.MapControllerRoute(
+                    name: "areas",
+                    pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
+
+                app.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}")
+                    .WithStaticAssets();
+
+                app.MapRazorPages()
+                   .WithStaticAssets();
+
+                app.Run();
             }
-
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
+            catch (Exception ex) when (ex is not HostAbortedException)
             {
-                app.UseMigrationsEndPoint();
+                Log.Fatal(ex, "Застосунок несподівано зупинився під час запуску.");
+                throw;
             }
-            else
+            finally
             {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
+                Log.CloseAndFlush();
             }
-
-            app.UseHttpsRedirection();
-
-            app.UseStaticFiles();
-            app.UseRouting();
-
-            app.UseAuthentication();
-            app.UseAuthorization();
-
-            app.MapStaticAssets();
-
-            app.MapControllerRoute(
-                name: "areas",
-                pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
-
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}")
-                .WithStaticAssets();
-
-            app.MapRazorPages()
-               .WithStaticAssets();
-
-            app.Run();
         }
     }
 }
