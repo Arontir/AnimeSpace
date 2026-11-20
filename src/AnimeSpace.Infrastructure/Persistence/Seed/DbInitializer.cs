@@ -23,7 +23,7 @@ namespace AnimeSpace.Infrastructure.Persistence.Seed
         private static readonly string[] DefaultGenres =
         [
             "Екшн", "Пригоди", "Комедія", "Драма", "Фентезі",
-            "Романтика", "Фантастика", "Спорт", "Детектив", "Повсякденність"
+            "Романтика", "Фантастика", "Спорт", "Детектив", "Повсякденність", "Ісекай"
         ];
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace AnimeSpace.Infrastructure.Persistence.Seed
             }
         }
 
-        
+
         /// <summary>
         /// Створює роль Admin (якщо її немає) та адміністратора з налаштувань Seed.
         /// Якщо пошту або пароль не вказано, обліковий запис не створюється, а в журнал пишеться попередження.
@@ -114,7 +114,6 @@ namespace AnimeSpace.Infrastructure.Persistence.Seed
 
         /// <summary>
         /// Додає кілька демонстраційних тайтлів, якщо в базі немає жодного.
-        /// ToDo: Посилання на плеєр поки порожні: їх варто підібрати й перевірити в iframe окремо.
         /// </summary>
         private static async Task SeedDemoAnimeAsync(ApplicationDbContext db)
         {
@@ -134,48 +133,58 @@ namespace AnimeSpace.Infrastructure.Persistence.Seed
             {
                 new()
                 {
-                    Title = "Cowboy Bebop",
-                    Description = "Мисливці за головами подорожують Сонячною системою, переслідуючи злочинців і власне минуле.",
-                    ReleaseYear = 1998,
-                    Status = AnimeStatus.Finished,
-                    CreatedAt = now.AddMinutes(-5),
-                    Genres = Pick("Екшн", "Фантастика", "Пригоди")
-                },
-                new()
-                {
-                    Title = "Attack on Titan",
-                    Description = "Людство ховається за велетенськими стінами від титанів, які пожирають людей.",
-                    ReleaseYear = 2013,
-                    Status = AnimeStatus.Finished,
-                    CreatedAt = now.AddMinutes(-4),
-                    Genres = Pick("Екшн", "Драма", "Фентезі")
-                },
-                new()
-                {
-                    Title = "Haikyu!!",
-                    Description = "Невисокий, але завзятий хлопець приєднується до шкільної волейбольної команди.",
-                    ReleaseYear = 2014,
-                    Status = AnimeStatus.Finished,
-                    CreatedAt = now.AddMinutes(-3),
-                    Genres = Pick("Спорт", "Комедія", "Драма")
-                },
-                new()
-                {
-                    Title = "Spy x Family",
-                    Description = "Шпигун, кілерка й дівчинка-телепат вдають із себе звичайну родину.",
-                    ReleaseYear = 2022,
-                    Status = AnimeStatus.Ongoing,
-                    CreatedAt = now.AddMinutes(-2),
-                    Genres = Pick("Екшн", "Комедія")
-                },
-                new()
-                {
                     Title = "Frieren: Beyond Journey's End",
                     Description = "Після перемоги над Королем Демонів ельфійка-чарівниця вирушає пізнавати людей.",
                     ReleaseYear = 2023,
+                    PosterUrl = "https://m.media-amazon.com/images/M/MV5BZTI4ZGMxN2UtODlkYS00MTBjLWE1YzctYzc3NDViMGI0ZmJmXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+                    PlayerUrl = "https://www.youtube.com/embed/videoseries?list=PLtdSPZNWT1AuEnWLElajRzm2DZhx1tVhd",
+                    Status = AnimeStatus.Finished,
+                    CreatedAt = now.AddMinutes(-5),
+                    Genres = Pick("Пригоди", "Фентезі", "Драма")
+                },
+                new()
+                {
+                    Title = "The Eminence in Shadow",
+                    Description = "Хлопець, що мріє стати таємним очільником тіні, заснував вигадану організацію, яка виявилася справжньою.",
+                    ReleaseYear = 2022,
+                    PosterUrl = "https://m.media-amazon.com/images/M/MV5BMDFmMWJlMWYtMDFkNi00OWViLTkzOGEtNDI0YWNmM2M5MzI5XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+                    PlayerUrl = "https://www.youtube.com/embed/videoseries?list=PL3ongWuaWwZNBggs9x1Qcya3nRJzfMbkK",
+                    Status = AnimeStatus.Finished,
+                    CreatedAt = now.AddMinutes(-4),
+                    Genres = Pick("Екшн", "Комедія", "Фентезі", "Ісекай")
+                },
+                new()
+                {
+                    Title = "Chainsmoker Cat",
+                    Description = "Дівчина-кішка намагається впоратися з важкою нікотиновою залежністю, постійними боргами та проблемою з роботою через свою пагубну звичку.",
+                    ReleaseYear = 2026,
+                    PosterUrl= "https://m.media-amazon.com/images/M/MV5BZTY5MzFmMzYtZjBhNS00ZGU5LTgzZWEtZWZmNDU2MDIwOThkXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+                    PlayerUrl= "https://www.youtube.com/embed/videoseries?list=PL6GT3U72Ld9lYD_zI8HroRG81Y3jgO3jQ",
+                    Status = AnimeStatus.Finished,
+                    CreatedAt = now.AddMinutes(-3),
+                    Genres = Pick("Комедія", "Драма", "Повсякденність")
+                },
+                new()
+                {
+                    Title = "Delicious in Dungeon",
+                    Description = "Шукачі пригод проходять підземелля, готуючи й поїдаючи монстрів, щоб урятувати подругу.",
+                    ReleaseYear = 2024,
+                    PosterUrl= "https://m.media-amazon.com/images/M/MV5BNmU3ZGFhMmYtNzczYy00NTE0LThkYjgtNWFiYTY2NzRkM2QzXkEyXkFqcGc@._V1_.jpg",
+                    PlayerUrl= "https://ashdi.vip/serial/3110",
+                    Status = AnimeStatus.Finished,
+                    CreatedAt = now.AddMinutes(-2),
+                    Genres = Pick("Пригоди", "Комедія", "Фентезі")
+                },
+                new()
+                {
+                    Title = "Reincarnated as a Sword",
+                    Description = "Загиблий чоловік перероджується в розумний меч і стає наставником юної дівчинки-кішки.",
+                    ReleaseYear = 2022,
+                    PosterUrl= "https://m.media-amazon.com/images/M/MV5BNjdmMTA3ZWItNmRkZi00YWQ2LWEyMWMtMGFhZThhYTRmZmJlXkEyXkFqcGc@._V1_.jpg",
+                    PlayerUrl= "https://ashdi.vip/serial/1960",
                     Status = AnimeStatus.Ongoing,
                     CreatedAt = now.AddMinutes(-1),
-                    Genres = Pick("Пригоди", "Фентезі", "Драма")
+                    Genres = Pick("Екшн", "Пригоди", "Фентезі", "Ісекай")
                 }
             };
 
